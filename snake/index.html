@@ -1,0 +1,166 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>hahahaha</title>
+	<style type="text/css">
+	#main {
+		position: relative;
+		top: 100px;
+		left: 200px;
+
+		width: 1000px;
+		height: 500px;
+		background-color: black;
+		border: 3px solid yellow;
+	}
+	</style>
+</head>
+<body>
+	<canvas id="main"></canvas>
+
+	<script type="text/javascript">
+	var mark = 4;
+	var blockSize = 5;
+	var flag = false;
+	var canvas = document.getElementById('main');
+	var cxt = canvas.getContext('2d');
+
+	var Snake = {
+		speed: 150,
+		direction: 0,  // 0左，1上，2右，3下
+		length: 5, 
+		posX: 150,
+		posY: 50,
+		path: [
+		{
+			'x': 150,
+			'y': 50
+		},
+		{
+			'x': 155,
+			'y': 50
+		},
+		{
+			'x': 160,
+			'y': 50
+		},
+		{
+			'x': 165,
+			'y': 50
+		},
+		{
+			'x': 170,
+			'y': 50
+		}
+		],
+		init: function() {
+			this.posX = 150;
+			this.posY = 50;
+			this.length = 5;
+			this.direction = 0;
+			paint();
+			Food.init();
+			Food.paint(Food.posX, Food.posY);
+		}
+	}
+
+	var Food = {
+		posX: 1,
+		posY: 1,
+		count: 0,
+		init: function() {
+			this.posX = 5 * parseInt(60 * Math.random());
+			this.posY = 5 * parseInt(30 * Math.random());
+		},
+		paint: function(x, y) {
+			cxt.fillStyle = 'green';
+			cxt.fillRect(x, y, 5, 5);
+		},
+		isEaten: function() {
+			extend();
+			Food.init();
+			Food.paint(Food.posX, Food.posY);
+			Food.count++;
+		}
+	}
+
+	var paint = function() {
+		cxt.fillStyle = 'white';
+		for (var i = 0; i < Snake.length; i++) {
+			cxt.fillRect(Snake.path[i].x, Snake.path[i].y, blockSize, blockSize);
+		};
+	}
+
+	var Timer = function() {
+		switch(Snake.direction)
+		{
+			case 0: Snake.posX -= 5; break;
+			case 1: Snake.posY -= 5; break;
+			case 2: Snake.posX += 5; break;
+			case 3: Snake.posY += 5; break;
+		};
+
+		collisionDetection();
+
+		cxt.clearRect(0, 0, 400, 400);
+		goAhead();
+		paint();
+		Food.paint(Food.posX, Food.posY);
+		if(Food.count > 2)
+		{
+			Snake.speed -= (Snake.speed < 30) ? 20 : 0;
+			Food.count = 0;
+		}
+		setTimeout("Timer()", Snake.speed);
+	}
+
+	var collisionDetection = function() {
+		if(Snake.posX < 0 || Snake.posX  >= 300 || Snake.posY < 0 || Snake.posY >= 150) {
+			alert("You are dead.");
+			Snake.init();
+		}
+		for(var i = 0; i < Snake.length; i++) {
+			if(Snake.path[i].x == Snake.posX && Snake.path[i].y == Snake.posY) {
+				alert("You are dead.");
+				Snake.init();
+			}
+		}
+		if(Snake.posX == Food.posX && Snake.posY == Food.posY) {
+			Food.isEaten();
+		}
+	}
+
+	var goAhead = function() {
+		var current = {
+			"x": Snake.posX,
+			"y": Snake.posY
+		};
+		Snake.path.splice(0, 0, current);
+		if(!flag)
+		{
+			Snake.path.splice(Snake.length, 1);
+			flag = false;
+		}
+	}
+
+	var extend = function(x, y) {
+		flag = true;
+		Snake.length++;
+	}
+
+	Snake.init();
+	document.onkeydown = function(event) {
+		switch(event.keyCode)
+		{
+			case 37: Snake.direction = 0; break;
+			case 38: Snake.direction = 1; break;
+			case 39: Snake.direction = 2; break;
+			case 40: Snake.direction = 3; break;
+		}
+	};
+
+	Timer();
+
+	</script>
+</body>
+<html>
